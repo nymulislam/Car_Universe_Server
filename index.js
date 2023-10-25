@@ -43,18 +43,18 @@ async function run() {
         })
 
         // get data
-        app.get ('/cars/:id', async (req, res) => {
+        app.get('/cars/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await carsCollection.findOne(query);
             res.send(result)
         })
 
         //update data
-        app.put ('/cars/:id', async (req, res) => {
+        app.put('/cars/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
-            const options = {upsert: true};
+            const query = { _id: new ObjectId(id) };
+            const options = { upsert: true };
             const updateCar = req.body;
             const car = {
                 $set: {
@@ -70,7 +70,40 @@ async function run() {
             res.send(result)
         })
 
+        // delete data
+        app.delete('/cars/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await carsCollection.deleteOne(query);
+            res.send(result)
+        })
+
         
+        //cart items
+        const cartCollection = client.db("carsDB").collection("cart")
+
+        // add cart
+        app.post('/cart/add', async (req, res) => {
+            const selectedCar = req.body;
+            const result = await cartCollection.insertOne(selectedCar);
+            res.send(result)
+        })
+
+        // read data 
+        app.get('/cart/add', async (req, res) => {
+            const cursor = cartCollection.find();
+            const result = await cursor.toArray()
+            res.send(result);
+        })
+
+        // delete car from cart
+        app.delete('/cart/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await cartCollection.deleteOne(query)
+            res.send(result);
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
